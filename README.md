@@ -11,3 +11,13 @@ ticket_report.py - A program which reads in a PayPal purchase details csv file a
 TicketPurchaseDetails_scrubbed.csv - Ticket purchase details csv file from PayPal without identifying information.
 TicketPurchaseSummary_scrubbed.csv - Ticket purchase summary csv file from PayPal without identifying information.
 testoutput_scrubbed.txt - Output of ticket_processing.py on TicketPurchaseSummary_scrubbed.csv
+
+UpdateHTML:
+update_print.py - A program which reads in an html file with documentation for Python 2, and updates print statements to be Python 3 complient. (i.e. adds '(' ')' to each print statement). Developed for Python Data Representations Coursera course from Rice University.
+file_diff.py - A program used to check output with provided solution. (Provided by instructors, for similar program written by Tycho Spadaro, see ../FileDifferences)
+docs.html - HTML documentation for CodeSculptor in Python 2.
+docs_updated.html - Output HTML documentation for CodeSculptor in Python 3.
+docs_updated_solution.html -  Solution output HTML documentation for CodeSculptor in Python 3 provided by instructors. (note- edited to include more complete solution, see update_print.py docstring for details.)
+table.html - HTML test table with Python 2 print statements.
+table_updated.html - Output HTML test table with Python 3 print statements.
+table_updated_solution.html - Solution output HTML test table with Python 3 print statements provided by instructors for testing.
