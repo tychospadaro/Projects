@@ -1,0 +1,10 @@
+Mini-projects written in Python 2, using codeskulptor "simplegui"
+Need to be translated to Python 3 and tkinter for GUI
+
+Week 2 - program + codeskulptor solution
+https://www.coursera.org/learn/interactive-python-1/peer/vqRMl/rock-paper-scissors-lizard-spock
+http://www.codeskulptor.org/#user44_6xZVdeKTEH_3.py
+
+Week 3 - program + codeskulptor solution
+https://www.coursera.org/learn/interactive-python-1/supplement/zrxfY/mini-project-description
+http://www.codeskulptor.org/#user44_s1JM47MyJP_1.py
