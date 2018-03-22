@@ -20,10 +20,11 @@ def new_game():
     min_guess, max_guess = range_min, range_max
     tries = max_tries()
 
-    print
-    print 'Beginning new game'
-    print 'Guess the secret number between ' + str(range_min) + ' and ' + str(range_max-1) + '.'
-    print 'You have ' + str(tries) + ' guesses'
+    print ()
+    print ('Beginning new game')
+    print ('Guess the secret number between ' + str(range_min)
+           + ' and ' + str(range_max-1) + '.')
+    print ('You have ' + str(tries) + ' guesses')
 
 def max_tries():
     """return the max tries based on range_min and range_max"""
@@ -40,9 +41,9 @@ def change_range(new_min, new_max):
     """called by other functions to change the range"""
     global range_min, range_max
     if range_min == new_min and range_max == new_max:
-        print 'Range already [' + str(range_min) + ',' + str(range_max) + ')...'
+        print ('Range already [' + str(range_min) + ',' + str(range_max) + ')...')
     else:
-        print 'Changing range to [' + str(range_min) + ',' + str(range_max) + ')'
+        print ('Changing range to [' + str(range_min) + ',' + str(range_max) + ')')
         range_min, range_max = new_min, new_max
     new_game()
 
@@ -65,45 +66,45 @@ def toggle_hints():
     """toggles printing of optimal play hints"""
     global hints
     if hints:
-        print 'Turning off hints'
+        print ('Turning off hints')
     else:
-        print 'Turning on hints'
-        print "Optimal guess: " + optimal_guess(min_guess, max_guess)
+        print ('Turning on hints')
+        print ("Optimal guess: " + optimal_guess(min_guess, max_guess))
     hints = not hints
 
 def input_guess(guess):
     """accepts user input guess and outputs depending on high/low/correct answer"""
-    print
+    print ()
     global tries
     tries -= 1
     if tries <= 0:
-        print 'Last chance!'
+        print ('Last chance!')
 
-    print "Guess was " + guess
+    print ("Guess was " + guess)
     int_guess = int(guess)
 
     if int_guess > secret_number: 	# guess too big
-        print "Lower"
-        global max_guess				# update current max
+        print ("Lower")
+        global max_guess		    # update current max
         max_guess = int_guess
     elif int_guess < secret_number: # guess too low
-        print "Higher"
+        print ("Higher")
         global min_guess				# update current min
         min_guess = int_guess
     else:
-        print "Correct"
-        print 'Resetting at current range: [' + str(range_min) + ',' + str(range_max) + ')'
+        print ("Correct")
+        print ('Resetting at current range: [' + str(range_min) + ',' + str(range_max) + ')')
         new_game()
 
     if tries <= 0:
-        print 'You lost!'
-        print 'Resetting at current range: [' + str(range_min) + ',' + str(range_max) + ')'
+        print ('You lost!')
+        print ('Resetting at current range: [' + str(range_min) + ',' + str(range_max) + ')')
         new_game()
     elif tries < max_tries():
-        print 'You have ' + str(tries) + ' guesses remaining'
+        print ('You have ' + str(tries) + ' guesses remaining')
 
     if hints:
-        print "Optimal next guess: " + optimal_guess(min_guess, max_guess)
+        print ("Optimal next guess: " + optimal_guess(min_guess, max_guess))
 
 # create frame
 frame = simplegui.create_frame('Guess the number', 200, 500)
@@ -122,9 +123,9 @@ frame.add_label('Change Range to',150)
 frame.add_input('[user_min, user_max)', input_guess, 50)
 frame.add_button('Hints?', toggle_hints, 110)
 
-
 # call new_game
 new_game()
 
+frame.start()
 
 # always remember to check your completed program against the grading rubric
