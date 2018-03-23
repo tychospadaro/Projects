@@ -26,7 +26,9 @@ MiniProjects:
 # Need to be converted from Python 2 to 3, & from "simpleGUI" to Tkinter
 solved_projects.txt - list of links to assignments & CodeSkulptor "saves"
 guess_the_number.py - guess a number within a range.
+pong.py - the classic pong
 rpslS.py - Rock, Paper, Scissors, Lizard, Spock
+stopwatch_game - stop the watch at an even tenth of a second.
 
 UpdateHTML:
 update_print.py - A program which reads in an html file with documentation for 
