@@ -25,6 +25,7 @@ MiniProjects:
 # small projects deveolped during "Fundamentals of Programming" specialization.
 # Need to be converted from Python 2 to 3, & from "simpleGUI" to Tkinter
 solved_projects.txt - list of links to assignments & CodeSkulptor "saves"
+blackjack.py - implementation of blackjack (21), contains deck and card classes
 guess_the_number.py - guess a number within a range.
 memory.py - classic memory game
 pong.py - the classic pong
@@ -33,7 +34,7 @@ stopwatch_game - stop the watch at an even tenth of a second.
 
 UpdateHTML:
 update_print.py - A program which reads in an html file with documentation for
-  Python 2, and updates print statements to be Python 3 complient. (i.e. adds 
+  Python 2, and updates print statements to be Python 3 complient. (i.e. adds
   '(' ')' to each print statement). Developed for Python Data Representations
   Coursera course from Rice University.
 file_diff.py - A program used to check output with provided solution. (Provided

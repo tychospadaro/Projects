@@ -24,3 +24,8 @@ Week 5 - Memory - proj description + codeskulptor code save
 https://www.coursera.org/learn/interactive-python-2/supplement/lnYpa/mini-project-description
 http://www.codeskulptor.org/#user44_6RwMuvtrje_0.py   # base
 http://www.codeskulptor.org/#user44_6RwMuvtrje_2.py   # with flag cards
+
+Week 6 - Blackjack - proj description + codeskulptor code save
+cards at https://dl.dropbox.com/s/j6a1njaoktrttnn/cards.png?dl=0
+https://www.coursera.org/learn/interactive-python-2/supplement/IUpaS/mini-project-description
+http://www.codeskulptor.org/#user44_b5kbB3aomI_0.py

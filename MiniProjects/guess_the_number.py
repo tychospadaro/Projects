@@ -1,13 +1,46 @@
-# template for "Guess the number" mini-project
-# input will come from buttons and an input field
-# all output for the game will be printed in the console
+#! python
+"""
+"Guess the number" mini-project
+Stable in Python 3.6.4
+"""
+import tkinter as tk
+import random
+import math
 
-import random, math
+# initialize GUI
+root = tk.Tk()
+root.geometry("250x250")
+root.title('Guess the Number')
 
-try:
-    import simplegui
-except ImportError:
-    import SimpleGUICS2Pygame.simpleguics2pygame as simplegui
+menubar = tk.Menu(root)
+appmenu = tk.Menu(menubar, tearoff=0)
+rangemenu = tk.Menu(menubar)
+rangemenu.add_command(label='[0,100)', command=donothing)
+rangemenu.add_command(label='[0,1000)', command=donothing)
+rangemenu.add_separator()
+rangemenu.add_command(label='User Define', command=donothing)
+appmenu.add_cascade(label='Change Range', menu=rangemenu)
+appmenu.add_checkbutton(label='Hints?', command=donothing)
+appmenu.add_command(label='Reset', command=donothing)
+appmenu.add_separator()
+appmenu.add_command(label='Exit', command=root.quit)
+menubar.add_cascade(label='App', menu=appmenu)
+
+
+frame0 = tk.Frame(root)
+frame0.grid(row=0, column=0)
+label1 = tk.Label(frame0, text='Enter guess:')
+label1.pack(side=tk.LEFT)
+entry1 = tk.Entry(frame0)
+entry1.pack(side=tk.RIGHT)
+
+frame1 = tk.Frame(root)
+frame1.grid(row=1, column=0)
+
+canvas1 = tk.Canvas(root, width=250, height=100, bg='black')
+canvas1.grid(row=2, column=0)
+
+
 
 range_min, range_max = 0, 100
 hints = False
