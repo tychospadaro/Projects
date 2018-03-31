@@ -3,135 +3,187 @@
 import simplegui
 import random
 
-# initialize globals - pos and vel encode vertical info for paddles
+# Globals
+# Base constants
 WIDTH = 600
 HEIGHT = 400
-BALL_RADIUS = 20
-PAD_WIDTH = 8
-PAD_HEIGHT = 80
-HALF_PAD_WIDTH = PAD_WIDTH / 2
-HALF_PAD_HEIGHT = PAD_HEIGHT / 2
-LEFT = False
-RIGHT = True
-PADDLE_VEL = 3.5
 
-# initialize ball_pos and ball_vel for new ball in middle of table
-# if direction is RIGHT, the ball's velocity is upper right, else upper left
-def spawn_ball(direction):
-    global ball_pos, ball_vel # these are vectors stored as lists
-    ball_pos = [WIDTH / 2, HEIGHT / 2]
-    ball_vel = [0.0, 0.0]
-    ball_vel[0] = 2.0 + random.random() * 2.0	# range from 2 - 4
-    ball_vel[1] = -(1.0 + random.random())		# range from 1 - 2
-    if direction == LEFT:
-        ball_vel[0] = - ball_vel[0]
+# Scalings
+PAD_W_SCALE = 0.02		# 2% of width
+PAD_H_SCALE = 0.20		# 20% of height
+PAD_VEL_SCALE = 0.01 	# 1% of height per update
+RADIUS_SCALE = 0.05		# 5% of height
+BALL_VEL_SCALE = 1		# magic numbers in class, scale from here
 
-def pad_pts(center):
-    """given paddle center (as [x,y];
-       return a list of points representing paddle corners"""
-    u_l = [center[0] + HALF_PAD_WIDTH, center[1] + HALF_PAD_HEIGHT]
-    b_l = [center[0] - HALF_PAD_WIDTH, center[1] + HALF_PAD_HEIGHT]
-    b_r = [center[0] - HALF_PAD_WIDTH, center[1] - HALF_PAD_HEIGHT]
-    u_r = [center[0] + HALF_PAD_WIDTH, center[1] - HALF_PAD_HEIGHT]
-    return [u_l, b_l, b_r, u_r]
+# Derived constants
+PAD_WIDTH = WIDTH * PAD_W_SCALE
+PAD_HEIGHT = HEIGHT * PAD_H_SCALE
+PAD_STOP = PAD_HEIGHT / 2
+L_GUTTER = PAD_WIDTH
+R_GUTTER = WIDTH - PAD_WIDTH
+PADDLE_SPD = HEIGHT * PAD_VEL_SCALE
+BALL_RADIUS = HEIGHT * RADIUS_SCALE
 
-# define event handlers
-def new_game():
-    global paddle1_pos, paddle2_pos, paddle1_vel, paddle2_vel  # these are numbers
-    global score1, score2  # these are ints
-    direction = random.choice([LEFT, RIGHT])
-    score1, score2 = 0, 0
-    paddle1_pos = [float(HALF_PAD_WIDTH), float(HEIGHT / 2)]
-    paddle2_pos = [float(WIDTH - HALF_PAD_WIDTH), float(HEIGHT / 2)]
-    paddle1_vel = 0.0
-    paddle2_vel = 0.0
-    spawn_ball(direction)
+# Define classes
+class Ball:
+    """a class for the ball"""
+    def __init__(self, color = 'white'):
+        self.center = [WIDTH/2, HEIGHT/2]
+        self.radius = BALL_RADIUS
+        self.vel = [0, 0]
+        self.color = color
+        self.go_left = random.choice([True, False])
+
+    def restart(self):
+        self.center = [WIDTH/2, HEIGHT/2]
+        self.vel[0] = (2.0 + random.random() * 2.0)	* BALL_VEL_SCALE	# range from 2 - 4
+        self.vel[0] *= (-1) ** self.go_left
+        self.vel[1] = (-(1.0 + random.random())) * BALL_VEL_SCALE		# range from 1 - 2
+
+    def update(self, l_pad, r_pad):
+        btwn_top_bot = BALL_RADIUS < (self.center[1] + self.vel[1]) < HEIGHT - BALL_RADIUS
+        if not btwn_top_bot:
+            self.vel[1] *= -1
+
+        touch_l_gutter = (self.center[0] + self.vel[0]) < L_GUTTER + BALL_RADIUS
+        touch_r_gutter = (self.center[0] + self.vel[0]) > R_GUTTER - BALL_RADIUS
+        on_l_pad = l_pad.get_bot() < self.center[1] < l_pad.get_top()
+        on_r_pad = r_pad.get_bot() < self.center[1] < r_pad.get_top()
+
+        if not(touch_l_gutter or touch_r_gutter):
+            self.center[0] += self.vel[0]
+            self.center[1] += self.vel[1]
+        elif touch_l_gutter and not on_l_pad:
+            r_pad.scored()
+            self.go_left = False
+            self.restart()
+        elif touch_r_gutter and not on_r_pad:
+            l_pad.scored()
+            self.go_left = True
+            self.restart()
+        else:
+            self.vel[0] *= -1.1
+
+    def draw(self, canvas):
+        canvas.draw_circle(self.center, self.radius, 1, self.color, self.color)
+
+class Paddle:
+    """a class to control paddles"""
+    def __init__(self, name, x_pos, x_score, color = 'white'):
+        self.name = name
+        self.center = [x_pos, HEIGHT/2]
+        self.score_pos = (x_score, PAD_HEIGHT/2)
+        self.up = False
+        self.down = False
+        self.vel = 0.0
+        self.color = color
+        self.score = 0
+
+    def __str__(self):
+        return self.name
+
+    def get_top(self):
+        return self.center[1] + PAD_HEIGHT/2
+
+    def get_bot(self):
+        return self.center[1] - PAD_HEIGHT/2
+
+    def scored(self):
+        self.score += 1
+
+    def reset_score(self):
+        self.score = 0
+
+    def get_corners(self):
+        lft = self.center[0] - PAD_WIDTH/2
+        rgt = self.center[0] + PAD_WIDTH/2
+        top = self.center[1] + PAD_HEIGHT/2
+        bot = self.center[1] - PAD_HEIGHT/2
+        return [[lft, top], [rgt, top], [rgt, bot], [lft, bot]]
+
+    def move_up(self):
+        self.up = not self.up
+
+    def move_down(self):
+        self.down = not self.down
+
+    def update(self):
+        self.vel = (int(self.down) - int(self.up)) * PADDLE_SPD
+        btwn_stops = PAD_STOP < (self.center[1] + self.vel) < HEIGHT - PAD_STOP
+        if btwn_stops:
+            self.center[1] += self.vel
+
+    def draw(self, canvas):
+        canvas.draw_polygon(self.get_corners(), 1, self.color, self.color)
+        canvas.draw_text(str(self.score), self.score_pos, 20, self.color)
+
+class Arena:
+    """a class to define the playing area"""
+    def __init__(self, color = 'white'):
+        self.size = (WIDTH, HEIGHT)
+        self.color = color
+
+    def draw(self, canvas):
+        center_x = WIDTH/2
+
+        canvas.draw_line([center_x, 0],[center_x, HEIGHT], 1, self.color)
+        canvas.draw_line([L_GUTTER, 0],[L_GUTTER, HEIGHT], 1, self.color)
+        canvas.draw_line([R_GUTTER, 0],[R_GUTTER, HEIGHT], 1, self.color)
+
+# Instantiate objects
+ball = Ball()
+l_pad = Paddle('left', 0 + PAD_WIDTH/2, WIDTH/4)
+r_pad = Paddle('right', WIDTH - PAD_WIDTH/2, 3*WIDTH/4)
+arena = Arena()
+
+# Define event handlers
+def new_game(ball):
+    ball.restart()
+    l_pad.reset_score()
+    r_pad.reset_score()
 
 def draw(canvas):
-    global score1, score2, paddle1_pos, paddle2_pos, ball_pos, ball_vel
+    ball.update(l_pad, r_pad)
+    l_pad.update()
+    r_pad.update()
 
-    # draw mid line and gutters
-    canvas.draw_line([WIDTH / 2, 0],[WIDTH / 2, HEIGHT], 1, "White")
-    canvas.draw_line([PAD_WIDTH, 0],[PAD_WIDTH, HEIGHT], 1, "White")
-    canvas.draw_line([WIDTH - PAD_WIDTH, 0],[WIDTH - PAD_WIDTH, HEIGHT], 1, "White")
+    arena.draw(canvas)
+    ball.draw(canvas)
+    l_pad.draw(canvas)
+    r_pad.draw(canvas)
 
-    # update ball
-    if ball_pos[1] <= BALL_RADIUS or \
-        ball_pos[1] >= HEIGHT - BALL_RADIUS:
-        ball_vel[1] = -ball_vel[1]		# ceiling/floor collision check
-    ball_pos[0] += ball_vel[0]			# move ball (x)
-    ball_pos[1] += ball_vel[1]			# move ball (y)
-    # draw ball
-    canvas.draw_circle(ball_pos, BALL_RADIUS, 1, 'White', 'White')
-
-    # update paddle's vertical position, keep paddle on the screen
-    if paddle1_pos[1] + paddle1_vel > HALF_PAD_HEIGHT and \
-       paddle1_pos[1] + paddle1_vel < HEIGHT - HALF_PAD_HEIGHT:
-        paddle1_pos[1] += paddle1_vel	# check ceil/floor, move paddle1
-    if paddle2_pos[1] + paddle2_vel > HALF_PAD_HEIGHT and \
-       paddle2_pos[1] + paddle2_vel < HEIGHT - HALF_PAD_HEIGHT:
-        paddle2_pos[1] += paddle2_vel	# check ceil/floor, move paddle2
-    # draw paddles
-    paddle1 = canvas.draw_polygon(pad_pts(paddle1_pos), 1, 'white', 'white')
-    paddle2 = canvas.draw_polygon(pad_pts(paddle2_pos), 1, 'white', 'white')
-
-    # determine whether paddle and ball collide
-    strike_left = ball_pos[0] <= PAD_WIDTH + BALL_RADIUS
-    pad1_ball_overlap = ball_pos[1] > paddle1_pos[1] - HALF_PAD_HEIGHT \
-                    and ball_pos[1] < paddle1_pos[1] + HALF_PAD_HEIGHT
-    strike_right = ball_pos[0] >= WIDTH - (PAD_WIDTH + BALL_RADIUS)
-    pad2_ball_overlap = ball_pos[1] > paddle2_pos[1] - HALF_PAD_HEIGHT \
-                    and ball_pos[1] < paddle2_pos[1] + HALF_PAD_HEIGHT
-
-    if strike_left and pad1_ball_overlap:	# strike left bumper
-        ball_vel[0] = -1.1 * ball_vel[0]	# reverse & speed up ball
-        ball_vel[1] = 1.1 * ball_vel[1]		#
-    elif strike_left:						# strike left gutter
-        score2 += 1							# score for Right
-        spawn_ball(RIGHT)					# respawn right
-    elif strike_right and pad2_ball_overlap:# strike right bumper
-        ball_vel[0] = -1.1 * ball_vel[0]	# reverse & speed up ball
-        ball_vel[1] = 1.1 * ball_vel[1]		#
-    elif strike_right:						# strike right gutter
-        score1 += 1							# score for Left
-        spawn_ball(LEFT)					# respawn left
-
-    # draw scores
-    canvas.draw_text(str(score1), (WIDTH/4, 40), 20, 'white')
-    canvas.draw_text(str(score2), (3*WIDTH/4, 40), 20, 'white')
+KEY_MAP = {}
+for key in simplegui.KEY_MAP:
+    KEY_MAP[simplegui.KEY_MAP[key]] = key
+KEY_BINDINGS = {
+    'W': l_pad.move_up,
+    'S': l_pad.move_down,
+    'up': r_pad.move_up,
+    'down': r_pad.move_down,
+    }
 
 def keydown(key):
-    global paddle1_vel, paddle2_vel
-    if key == simplegui.KEY_MAP["w"]:
-        paddle1_vel -= PADDLE_VEL	# paddle1 up
-    elif key == simplegui.KEY_MAP["s"]:
-        paddle1_vel += PADDLE_VEL	# paddle1 down
-    elif key == simplegui.KEY_MAP["up"]:
-        paddle2_vel -= PADDLE_VEL	# paddle2 up
-    elif key == simplegui.KEY_MAP["down"]:
-        paddle2_vel += PADDLE_VEL	# paddle2 down
+    try:
+        KEY_BINDINGS[KEY_MAP[key]]()
+    except KeyError:
+        pass
 
 def keyup(key):
-    global paddle1_vel, paddle2_vel
-    if key == simplegui.KEY_MAP["w"]:
-        paddle1_vel += PADDLE_VEL	# paddle1 stop/down
-    elif key == simplegui.KEY_MAP["s"]:
-        paddle1_vel -= PADDLE_VEL	# paddle1 stop/up
-    elif key == simplegui.KEY_MAP["up"]:
-        paddle2_vel += PADDLE_VEL	# paddle2 stop/down
-    elif key == simplegui.KEY_MAP["down"]:
-        paddle2_vel -= PADDLE_VEL	# paddle2 stop/up
+    try:
+        KEY_BINDINGS[KEY_MAP[key]]()
+    except KeyError:
+        pass
 
-def click():
-    new_game()
+def reset_button():
+    new_game(ball)
 
-# create frame
+# Create frame, Register events
 frame = simplegui.create_frame("Pong", WIDTH, HEIGHT)
 frame.set_draw_handler(draw)
 frame.set_keydown_handler(keydown)
 frame.set_keyup_handler(keyup)
-frame.add_button('Restart', click)
+frame.add_button('Restart', reset_button)
 
-# start frame
-new_game()
+# Start frame
+new_game(ball)
 frame.start()
