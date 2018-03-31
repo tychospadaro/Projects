@@ -196,7 +196,7 @@ def cheat_update():
         dealer_card = ''
         dealer_val = 'hidden'
         next_card = ''
-        player_val = p_hand.get_value()
+    player_val = p_hand.get_value()
 
 # draw handler
 def draw(canvas):
