@@ -7,15 +7,20 @@ import random
 WIDTH = 800
 HEIGHT = 600
 SHIP_ANGLE_VEL = 0.1
-SHIP_ACCEL = 0.8
+SHIP_ACCEL = 0.5
 FRICTION = 0.025
 ROCK_VEL_LIMIT = 2
 ROCK_ROT_LIMIT = 0.1
-MISSILE_SPD = 3
+MISSILE_SPD = 5
 
+started = False
 score = 0
+hi_score = 0
 lives = 3
 time = 0
+rocks = set()
+
+muted = False
 
 class ImageInfo:
     def __init__(self, center, size, radius = 0, lifespan = None, animated = False):
@@ -81,6 +86,7 @@ missile_sound = simplegui.load_sound("http://commondatastorage.googleapis.com/co
 missile_sound.set_volume(0.5)
 ship_thrust_sound = simplegui.load_sound("http://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/thrust.mp3")
 explosion_sound = simplegui.load_sound("http://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/explosion.mp3")
+sounds = [soundtrack, missile_sound, ship_thrust_sound, explosion_sound]
 
 # alternative upbeat soundtrack by composer and former IIPP student Emiel Stopler
 # please do not redistribute without permission from Emiel at http://www.filmcomposer.nl
@@ -93,6 +99,51 @@ def angle_to_vector(ang):
 def dist(p,q):
     return math.sqrt((p[0] - q[0]) ** 2+(p[1] - q[1]) ** 2)
 
+def centered_random(center, dist):
+    return random.random() * 2 * dist + center - dist
+
+def vector_vector_update(vector, values, operator):
+    for idx, val in enumerate(vector):
+        if operator == '+':
+            vector[idx] += values[idx]
+        elif operator == '-':
+            vector[idx] -= values[idx]
+        elif operator == '*':
+            vector[idx] *= values[idx]
+        elif operator == '%':
+            vector[idx] %= values[idx]
+        else:
+            print operator + ' not yet supported'
+
+def vector_scalar_update(vector, value, operator):
+    for idx, val in enumerate(vector):
+        if operator == '+':
+            vector[idx] += value
+        elif operator == '-':
+            vector[idx] -= value
+        elif operator == '*':
+            vector[idx] *= value
+        elif operator == '%':
+            vector[idx] %= value
+        else:
+            print operator + ' not yet supported'
+
+def group_collide(fragile_object, rocks):
+    removal_set = set()
+    for rock in list(rocks):
+        if rock.collide(fragile_object):
+            removal_set.add(rock)
+    rocks.difference_update(removal_set)
+    return len(removal_set)
+
+def group_group_collide(missiles, rocks):
+    score = 0
+    for missile in list(missiles):
+        hit = group_collide(missile, rocks)
+        if hit > 0:
+            missiles.remove(missile)
+            score += hit
+    return score
 
 # Ship class
 class Ship:
@@ -109,10 +160,37 @@ class Ship:
         self.image_center = info.get_center()
         self.image_size = info.get_size()
         self.radius = info.get_radius()
+        self.missiles = set()
 
     def draw(self,canvas):
         canvas.draw_image(self.image, self.image_center, self.image_size,
                           self.pos, self.image_size, self.angle)
+        map(lambda missile: missile.draw(canvas), self.missiles)
+
+    def update(self):
+        int_rotation = (int(self.rotate_r) - int(self.rotate_l))
+        self.angle_vel = int_rotation * SHIP_ANGLE_VEL
+        self.angle += self.angle_vel
+
+        if self.thrust:
+            forward = angle_to_vector(self.angle)
+            vector_scalar_update(forward, SHIP_ACCEL, '*')
+            vector_vector_update(self.vel, forward, '+')
+        vector_scalar_update(self.vel, (1-FRICTION), '*')
+
+        vector_vector_update(self.pos, self.vel, '+')
+        vector_vector_update(self.pos, [WIDTH, HEIGHT], '%')
+
+        map(lambda missile: missile.update(), self.missiles)
+        despawn_expired = filter(lambda missile: missile.despawn(), self.missiles)
+        self.missiles.difference_update(despawn_expired)
+
+    def rotate_left(self):
+        self.rotate_l = not self.rotate_l
+
+    def rotate_right(self):
+        self.rotate_r = not self.rotate_r
+
     def fire_thrust(self):
         self.thrust = not self.thrust
         self.image_center[0] = (self.image_center[0] + 90)%180
@@ -121,30 +199,18 @@ class Ship:
         else:
             self.thrust_sound.rewind()
 
-    def rotate_left(self):
-        self.rotate_l = not self.rotate_l
-    def rotate_right(self):
-        self.rotate_r = not self.rotate_r
+    def fire_missile(self):
+        nose = self.get_tip()
+        velocity = self.get_missile_vel()
+        self.missiles.add(Sprite(nose, velocity, 0, 0, missile_image, missile_info, missile_sound))
 
-    def update(self):
-        self.angle_vel = (int(self.rotate_r) - int(self.rotate_l))\
-                         * SHIP_ANGLE_VEL
-        self.angle += self.angle_vel
+    def get_position(self):
+        return self.pos
 
-        if self.thrust:
-            forward = angle_to_vector(self.angle)
-            self.vel[0] += forward[0] * SHIP_ACCEL
-            self.vel[1] += forward[1] * SHIP_ACCEL
+    def get_radius(self):
+        return self.radius
 
-        self.vel[0] *= (1 - FRICTION)
-        self.vel[1] *= (1 - FRICTION)
-
-        self.pos[0] += self.vel[0]
-        self.pos[1] += self.vel[1]
-
-        self.pos[0] %= WIDTH
-        self.pos[1] %= HEIGHT
-
+    # internal functions
     def get_tip(self):
         pos_x, pos_y = self.pos
         unit_x, unit_y = angle_to_vector(self.angle)
@@ -159,13 +225,7 @@ class Ship:
         tot_y = vel_y + (unit_y * MISSILE_SPD)
         return [tot_x, tot_y]
 
-    def fire_missile(self):
-        global a_missile
-        nose = self.get_tip()
-        velocity = self.get_missile_vel()
-        a_missile = Sprite(nose, velocity, 0, 0, missile_image, missile_info, missile_sound)
-
-
+my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info, ship_thrust_sound)
 
 # Sprite class
 class Sprite:
@@ -185,44 +245,86 @@ class Sprite:
             sound.rewind()
             sound.play()
 
+    def __repr__(self):
+        if self.radius == 3:
+            return 'missile'
+        elif self.radius == 40:
+            return 'asteroid'
+        else:
+            return 'unknown'
+
     def draw(self, canvas):
         canvas.draw_image(self.image, self.image_center, self.image_size,
                           self.pos, self.image_size, self.angle)
 
     def update(self):
         self.angle += self.angle_vel
+        vector_vector_update(self.pos, self.vel, '+')
+        vector_vector_update(self.pos, [WIDTH, HEIGHT], '%')
+        self.age += 1
 
-        self.pos[0] += self.vel[0]
-        self.pos[1] += self.vel[1]
+    def get_position(self):
+        return self.pos
 
-        self.pos[0] %= WIDTH
-        self.pos[1] %= HEIGHT
+    def get_radius(self):
+        return self.radius
 
+    def collide(self, other_object):
+        crash_dist = self.radius + other_object.get_radius()
+        distance = dist(self.pos, other_object.get_position())
 
+        if distance < crash_dist:
+            return True
+        else:
+            return False
 
-def centered_random(center, dist):
-    return random.random() * 2 * dist + center - dist
+    def despawn(self):
+        return self.age > self.lifespan
 
 # timer handler that spawns a rock
 def rock_spawner():
-    global a_rock
+    if len(rocks) > 12:
+        return
+
+    score_mod = 0.1 * score
     x_pos = random.random() * WIDTH
     y_pos = random.random() * HEIGHT
-    x_vel = centered_random(0, ROCK_VEL_LIMIT)
-    y_vel = centered_random(0, ROCK_VEL_LIMIT)
+    x_vel = centered_random(0, ROCK_VEL_LIMIT + score_mod)
+    y_vel = centered_random(0, ROCK_VEL_LIMIT + score_mod)
     ang = centered_random(0, math.pi)
     ang_vel = centered_random(0, ROCK_ROT_LIMIT)
-
-    a_rock = Sprite([x_pos, y_pos], [x_vel, x_vel], ang,
+    new_rock = Sprite([x_pos, y_pos], [x_vel, x_vel], ang,
                     ang_vel, asteroid_image, asteroid_info)
+    if new_rock.collide(my_ship):
+        rock_spawner()
+    else:
+        rocks.add(new_rock)
 
-# initialize ship and two sprites
-my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info, ship_thrust_sound)
-a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, -0.02, asteroid_image, asteroid_info)
-a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
+# initialize ship and rock
+def restart():
+    global started, score, lives, my_ship, rocks
+    started = False
+    soundtrack.rewind()
+    score = 0
+    lives = 3
+    my_ship.pos = [WIDTH / 2, HEIGHT / 2]
+    my_ship.vel = [0, 0]
+    my_ship.angle = 0
+    rocks = set()
+    rock_spawner()
+
+def mute():
+    global muted
+    if muted == False:
+        muted = True
+        map(lambda sound: sound.set_volume(0), sounds)
+    else:
+        muted = False
+        map(lambda sound: sound.set_volume(1), sounds)
+        missile_sound.set_volume(0.5)
 
 def draw(canvas):
-    global time
+    global time, started, lives, score, hi_score
 
     # animiate background
     time += 1
@@ -233,15 +335,28 @@ def draw(canvas):
     canvas.draw_image(debris_image, center, size, (wtime - WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
     canvas.draw_image(debris_image, center, size, (wtime + WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
 
-    # draw ship and sprites
-    my_ship.draw(canvas)
-    a_rock.draw(canvas)
-    a_missile.draw(canvas)
+    if not started:
+        canvas.draw_image(splash_image, splash_info.get_center(), splash_info.get_size(), [WIDTH/2, HEIGHT/2], splash_info.get_size())
+        canvas.draw_text('High Score: '+str(hi_score), [250,400], 20, 'white', 'sans-serif')
+        return
 
     # update ship and sprites
     my_ship.update()
-    a_rock.update()
-    a_missile.update()
+    map(lambda rock: rock.update(), rocks)
+
+    # draw ship and sprites
+    my_ship.draw(canvas)
+    map(lambda rock: rock.draw(canvas), rocks)
+
+    score += group_group_collide(my_ship.missiles, rocks)
+
+    if group_collide(my_ship, rocks) > 0:
+#        canvas.draw_image( ANIMATION & SOUND of EXPLOSION
+        lives -= 1
+
+    if lives <=0:
+        hi_score = max(score, hi_score)
+        restart()
 
     # draw score and lives
     canvas.draw_text('Lives', [45,50], 20, 'white', 'sans-serif')
@@ -256,11 +371,14 @@ KEY_BINDINGS = {
     'W': my_ship.fire_thrust,
     'A': my_ship.rotate_left,
     'D': my_ship.rotate_right,
+    'M': mute,
     'up': my_ship.fire_thrust,
     'left': my_ship.rotate_left,
     'right': my_ship.rotate_right,
     'space': my_ship.fire_missile,
     }
+
+KEY_TOGGLES = ['space', 'M']
 
 def keydown(key):
     try:
@@ -270,10 +388,16 @@ def keydown(key):
 
 def keyup(key):
     try:
-        if KEY_MAP[key] is not 'space':
+        if KEY_MAP[key] not in KEY_TOGGLES:
             KEY_BINDINGS[KEY_MAP[key]]()
     except KeyError:
         pass
+
+def click(pos):
+    global started
+    if not started:
+        started = True
+        soundtrack.play()
 
 # initialize frame
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
@@ -282,6 +406,7 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 frame.set_draw_handler(draw)
 frame.set_keydown_handler(keydown)
 frame.set_keyup_handler(keyup)
+frame.set_mouseclick_handler(click)
 
 timer = simplegui.create_timer(1000.0, rock_spawner)
 
