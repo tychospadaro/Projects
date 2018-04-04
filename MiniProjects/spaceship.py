@@ -19,6 +19,7 @@ hi_score = 0
 lives = 3
 time = 0
 rocks = set()
+explosions = set()
 
 muted = False
 
@@ -134,6 +135,8 @@ def group_collide(fragile_object, rocks):
         if rock.collide(fragile_object):
             removal_set.add(rock)
     rocks.difference_update(removal_set)
+    if len(removal_set) > 0:
+        explosion_spawner(fragile_object.get_position())
     return len(removal_set)
 
 def group_group_collide(missiles, rocks):
@@ -144,6 +147,15 @@ def group_group_collide(missiles, rocks):
             missiles.remove(missile)
             score += hit
     return score
+
+def despawner(sprites):
+    despawn_expired = filter(lambda sprite: sprite.despawn(), sprites)
+    sprites.difference_update(despawn_expired)
+
+def group_update_draw_despawn(group, canvas):
+    map(lambda item: item.update(), group)
+    map(lambda item: item.draw(canvas), group)
+    despawner(group)
 
 # Ship class
 class Ship:
@@ -163,9 +175,9 @@ class Ship:
         self.missiles = set()
 
     def draw(self,canvas):
+        group_update_draw_despawn(self.missiles, canvas)
         canvas.draw_image(self.image, self.image_center, self.image_size,
                           self.pos, self.image_size, self.angle)
-        map(lambda missile: missile.draw(canvas), self.missiles)
 
     def update(self):
         int_rotation = (int(self.rotate_r) - int(self.rotate_l))
@@ -180,10 +192,6 @@ class Ship:
 
         vector_vector_update(self.pos, self.vel, '+')
         vector_vector_update(self.pos, [WIDTH, HEIGHT], '%')
-
-        map(lambda missile: missile.update(), self.missiles)
-        despawn_expired = filter(lambda missile: missile.despawn(), self.missiles)
-        self.missiles.difference_update(despawn_expired)
 
     def rotate_left(self):
         self.rotate_l = not self.rotate_l
@@ -235,7 +243,7 @@ class Sprite:
         self.angle = ang
         self.angle_vel = ang_vel
         self.image = image
-        self.image_center = info.get_center()
+        self.image_center = list(info.get_center())
         self.image_size = info.get_size()
         self.radius = info.get_radius()
         self.lifespan = info.get_lifespan()
@@ -251,9 +259,14 @@ class Sprite:
         elif self.radius == 40:
             return 'asteroid'
         else:
-            return 'unknown'
+            position = str(list(self.pos))
+            age = str(self.age)
+            return position + ' ' + age
 
     def draw(self, canvas):
+        if self.animated:
+            print self.__repr__
+            self.image_center[0] = self.image_center[0] + self.image_size[0]
         canvas.draw_image(self.image, self.image_center, self.image_size,
                           self.pos, self.image_size, self.angle)
 
@@ -286,7 +299,7 @@ def rock_spawner():
     if len(rocks) > 12:
         return
 
-    score_mod = 0.1 * score
+    score_mod = 0.5 * score
     x_pos = random.random() * WIDTH
     y_pos = random.random() * HEIGHT
     x_vel = centered_random(0, ROCK_VEL_LIMIT + score_mod)
@@ -299,6 +312,11 @@ def rock_spawner():
         rock_spawner()
     else:
         rocks.add(new_rock)
+
+def explosion_spawner(center):
+    new_explosion = Sprite(center, [0, 0], 0, 0, explosion_image,
+                           explosion_info, explosion_sound)
+    explosions.add(new_explosion)
 
 # initialize ship and rock
 def restart():
@@ -342,16 +360,13 @@ def draw(canvas):
 
     # update ship and sprites
     my_ship.update()
-    map(lambda rock: rock.update(), rocks)
-
-    # draw ship and sprites
     my_ship.draw(canvas)
-    map(lambda rock: rock.draw(canvas), rocks)
+    group_update_draw_despawn(rocks, canvas)
+    group_update_draw_despawn(explosions, canvas)
 
     score += group_group_collide(my_ship.missiles, rocks)
 
     if group_collide(my_ship, rocks) > 0:
-#        canvas.draw_image( ANIMATION & SOUND of EXPLOSION
         lives -= 1
 
     if lives <=0:
