@@ -26,10 +26,12 @@ MiniProjects:
 # Need to be converted from Python 2 to 3, & from "simpleGUI" to Tkinter
 solved_projects.txt - list of links to assignments & CodeSkulptor "saves"
 blackjack.py - implementation of blackjack (21), contains deck and card classes
+bubble_shooter.py - shoot and pop bubbles
 guess_the_number.py - guess a number within a range.
 memory.py - classic memory game
 pong.py - the classic pong
 rpslS.py - Rock, Paper, Scissors, Lizard, Spock
+spaceship.py - an asteroid clone
 stopwatch_game - stop the watch at an even tenth of a second.
 
 UpdateHTML:

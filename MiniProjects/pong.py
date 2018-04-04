@@ -1,7 +1,11 @@
-# Implementation of classic arcade game Pong
-
-import simplegui
+#! python
+"""
+Pong - classic arcade game
+Stable in Python 3.6.4, with tkinter GUI
+"""
+import tkinter as tk
 import random
+import math
 
 # Globals
 # Base constants
@@ -28,25 +32,25 @@ BALL_RADIUS = HEIGHT * RADIUS_SCALE
 class Ball:
     """a class for the ball"""
     def __init__(self, color = 'white'):
-        self.center = [WIDTH/2, HEIGHT/2]
         self.radius = BALL_RADIUS
-        self.vel = [0, 0]
         self.color = color
         self.go_left = random.choice([True, False])
+        self.restart()
 
     def restart(self):
         self.center = [WIDTH/2, HEIGHT/2]
-        self.vel[0] = (2.0 + random.random() * 2.0)	* BALL_VEL_SCALE	# range from 2 - 4
+        self.vel[0] = (2.0 + random.random() * 2.0)	* BALL_VEL_SCALE
         self.vel[0] *= (-1) ** self.go_left
-        self.vel[1] = (-(1.0 + random.random())) * BALL_VEL_SCALE		# range from 1 - 2
+        self.vel[1] = (-(1.0 + random.random())) * BALL_VEL_SCALE
 
     def update(self, l_pad, r_pad):
-        btwn_top_bot = BALL_RADIUS < (self.center[1] + self.vel[1]) < HEIGHT - BALL_RADIUS
+        new_pos = (self.center[1] + self.vel[1])
+        btwn_top_bot = 0 + self.radius < new_pos < HEIGHT - self.radius
         if not btwn_top_bot:
             self.vel[1] *= -1
 
-        touch_l_gutter = (self.center[0] + self.vel[0]) < L_GUTTER + BALL_RADIUS
-        touch_r_gutter = (self.center[0] + self.vel[0]) > R_GUTTER - BALL_RADIUS
+        touch_l_gutter = (self.center[0] + self.vel[0]) < L_GUTTER + RADIUS
+        touch_r_gutter = (self.center[0] + self.vel[0]) > R_GUTTER - RADIUS
         on_l_pad = l_pad.get_bot() < self.center[1] < l_pad.get_top()
         on_r_pad = r_pad.get_bot() < self.center[1] < r_pad.get_top()
 
@@ -122,7 +126,8 @@ class Arena:
     def __init__(self, color = 'white'):
         self.size = (WIDTH, HEIGHT)
         self.color = color
-
+        self.center = (WIDTH/2, HEIGHT/2)
+        self.l_gutter = L_GUTTER
     def draw(self, canvas):
         center_x = WIDTH/2
 
@@ -131,11 +136,24 @@ class Arena:
         canvas.draw_line([R_GUTTER, 0],[R_GUTTER, HEIGHT], 1, self.color)
 
 # Instantiate objects
-ball = Ball()
-l_pad = Paddle('left', 0 + PAD_WIDTH/2, WIDTH/4)
-r_pad = Paddle('right', WIDTH - PAD_WIDTH/2, 3*WIDTH/4)
-arena = Arena()
+# ball = Ball()
+# l_pad = Paddle('left', 0 + PAD_WIDTH/2, WIDTH/4)
+# r_pad = Paddle('right', WIDTH - PAD_WIDTH/2, 3*WIDTH/4)
+# arena = Arena()
 
+class Pong(tk.Frame):
+    def __init__(self, master=None):
+        tk.frame.init(self, master)
+        self.grid()
+        self.createWidgets()
+        self.ball = Ball()
+        self.l_pad = Paddle('left', 0 + PAD_WIDTH/2, WIDTH/4)
+        self.r_pad = Paddle('right', WIDTH - PAD_WIDTH/2, 3*WIDTH/4)
+        self.arena = Arena()
+
+    def createWidgets(self):
+        self.quitButton = tk.Button(self, text='Quit', command=self.quit)
+        self.canvas = tk.Canvas(self)
 # Define event handlers
 def new_game(ball):
     ball.restart()
