@@ -39,8 +39,8 @@ http://www.codeskulptor.org/#user44_JZ0GoNmCxp_0.py
 
 Week 7.5 - Bubble Shooter - proj description + codeskulptor code save
 https://www.coursera.org/learn/interactive-python-2/supplement/Ztn5P/practice-exercises-for-sprites-and-sound-optional
-http://www.codeskulptor.org/#user44_3zwSklHeIf_0.py
+http://www.codeskulptor.org/#user44_3zwSklHeIf_1.py
 
 Week 8 - Spaceship - proj description + codeskulptor code save
 https://www.coursera.org/learn/interactive-python-2/supplement/2ZVsF/mini-project-description
-http://www.codeskulptor.org/#user44_pMXaM83nY2_4.py #WIP
+http://www.codeskulptor.org/#user44_pMXaM83nY2_8.py #WIP
