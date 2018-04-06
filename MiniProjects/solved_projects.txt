@@ -52,6 +52,7 @@ PRINCIPLES OF COMPUTING
 Week 1 - 2048 - proj description + codeskulptor code save
 https://www.coursera.org/learn/principles-of-computing-1/supplement/1baei/mini-project-description
 http://www.codeskulptor.org/#user44_O2WEYcWtpl_1.py # merge method only
+http://www.codeskulptor.org/#user44_sOB91JvRgx_2.py # complete, runs in codeskulptor
 
 Week 1.5 - Mancala - proj description + codeskulptor code save
 https://www.coursera.org/learn/principles-of-computing-1/supplement/HwJPF/practice-mini-project-solitaire-mancala
