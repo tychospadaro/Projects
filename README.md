@@ -35,6 +35,8 @@ pong.py - the classic pong
 rpslS.py - Rock, Paper, Scissors, Lizard, Spock
 spaceship.py - an asteroid clone
 stopwatch_game - stop the watch at an even tenth of a second.
+tic_tac_toe_monte_carlo - tic-tac-toe with a computer opponent that 
+plays optimally via a Monte Carlo selection method
 
 UpdateHTML:
 update_print.py - A program which reads in an html file with documentation for
