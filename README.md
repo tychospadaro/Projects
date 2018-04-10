@@ -31,6 +31,8 @@ bubble_shooter.py - shoot sticky bubbles
 guess_the_number.py - guess a number within a range.
 mancala.py - simplified game of mancala
 memory.py - classic memory game
+nim_monte_carlo.py - simple game of nim, with computer opponent who 
+plays optimally with a Monte Carlo algorithm
 pong.py - the classic pong
 rpslS.py - Rock, Paper, Scissors, Lizard, Spock
 spaceship.py - an asteroid clone

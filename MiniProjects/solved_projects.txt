@@ -64,3 +64,7 @@ https://www.coursera.org/learn/principles-of-computing-1/supplement/7gPV5/mini-p
 http://www.codeskulptor.org/#user44_BqibJuzu7N_0.py # my code
 http://www.codeskulptor.org/#poc_ttt_provided.py # Tic-Tac-Toe class provided by Rice
 http://www.codeskulptor.org/#poc_ttt_gui.py # gui provided by Rice
+
+Week 3.5 - Nim (MonteCarlo) - proj description + codeskulptor code save
+https://www.coursera.org/learn/principles-of-computing-1/supplement/iz8Ad/practice-mini-project-nim-monte-carlo
+http://www.codeskulptor.org/#user44_w6ZoY4G8om_2.py
