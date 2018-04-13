@@ -58,6 +58,8 @@ Week 1.5 - Mancala - proj description + codeskulptor code save
 https://www.coursera.org/learn/principles-of-computing-1/supplement/HwJPF/practice-mini-project-solitaire-mancala
 http://www.codeskulptor.org/#user44_mE8dGqGvwg_0.py # my code
 http://www.codeskulptor.org/#user44_Bvanu0tdky_0.py # gui provided by Rice
+http://www.codeskulptor.org/#user44_O2sBiynkrc_2.py # Stress testing!
+http://www.codeskulptor.org/#user44_TZIBudCZYW_8.py # HW w/ generator for seq, perm, comb etc.
 
 Week 3 - Tic-Tac-Toe (MonteCarlo) - proj description + codeskulptor code save
 https://www.coursera.org/learn/principles-of-computing-1/supplement/7gPV5/mini-project-description
@@ -68,3 +70,7 @@ http://www.codeskulptor.org/#poc_ttt_gui.py # gui provided by Rice
 Week 3.5 - Nim (MonteCarlo) - proj description + codeskulptor code save
 https://www.coursera.org/learn/principles-of-computing-1/supplement/iz8Ad/practice-mini-project-nim-monte-carlo
 http://www.codeskulptor.org/#user44_w6ZoY4G8om_2.py
+
+Week 4 - Yahtzee strategy - proj description + codeskulptor code save
+https://www.coursera.org/learn/principles-of-computing-1/supplement/MWNxX/mini-project-description
+http://www.codeskulptor.org/#user44_raCMFCdS5R_3.py
