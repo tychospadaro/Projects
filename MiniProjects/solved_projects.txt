@@ -47,12 +47,14 @@ Week 8 - Spaceship - proj description + codeskulptor code save
 https://www.coursera.org/learn/interactive-python-2/supplement/2ZVsF/mini-project-description
 http://www.codeskulptor.org/#user44_pMXaM83nY2_9.py
 
+
 PRINCIPLES OF COMPUTING
 
 Week 1 - 2048 - proj description + codeskulptor code save
 https://www.coursera.org/learn/principles-of-computing-1/supplement/1baei/mini-project-description
 http://www.codeskulptor.org/#user44_O2WEYcWtpl_1.py # merge method only
 http://www.codeskulptor.org/#user44_sOB91JvRgx_2.py # complete, runs in codeskulptor
+http://www.codeskulptor.org/#user44_Nj1zjDbYKc_1.py # Stress test merge...
 
 Week 1.5 - Mancala - proj description + codeskulptor code save
 https://www.coursera.org/learn/principles-of-computing-1/supplement/HwJPF/practice-mini-project-solitaire-mancala
@@ -74,3 +76,15 @@ http://www.codeskulptor.org/#user44_w6ZoY4G8om_2.py
 Week 4 - Yahtzee strategy - proj description + codeskulptor code save
 https://www.coursera.org/learn/principles-of-computing-1/supplement/MWNxX/mini-project-description
 http://www.codeskulptor.org/#user44_raCMFCdS5R_3.py
+
+Week 5 - Cookie Clicker strategy - proj description + codeskulptor code save
+https://www.coursera.org/learn/principles-of-computing-1/supplement/b3ZG8/mini-project-description
+http://www.codeskulptor.org/#user44_aVkXvuPhS9_22.py
+
+
+PRINCIPLES OF COMPUTING (Part 2)
+
+Week 1 - Zombie Apocalypse - proj description + codeskulptor code save
+Practice proj., grid_manhattan_distance.py
+https://www.coursera.org/learn/principles-of-computing-2/supplement/3VwCE/mini-project-description
+http://www.codeskulptor.org/#user44_LLMIqHEAwe_0.py

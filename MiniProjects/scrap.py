@@ -1,8 +1,4 @@
 #! python2
-
-words = str(input('enter a string: '))
-print words
-
 """
 A simple Monte Carlo solver for Nim
 http://en.wikipedia.org/wiki/Nim#The_21_game
